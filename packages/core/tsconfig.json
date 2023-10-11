@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "incremental": false,
+    "target": "ESNext",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ES6",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/tests/*": ["./tests/*"]
+    },
+    "strict": true,
+    "noImplicitOverride": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "types": [
+      "vitest/globals"
+    ]
+  },
+  "exclude": ["node_modules", "dist"]
+}
