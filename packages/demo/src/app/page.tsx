@@ -1,13 +1,15 @@
-import { Layout } from "@/components/Layout";
+'use client'
+import { LayoutFlow, Layout } from '@layout-flow/react'
+import { useEffect, useState } from 'react'
 
-const layout = {
+const rawLayout = {
   id: 'any_id',
   canEdit: true,
   sliceHeight: 85,
   sliceWidth: 85,
   gap: 5,
-  totalColumns: 100,
-  totalRows: 100,
+  totalColumns: 10,
+  totalRows: 10,
   availableWidth: 2000,
   items: [
     {
@@ -19,20 +21,30 @@ const layout = {
       id: '2',
       filledColumns: 2,
       filledRows: 2
+    },
+    {
+      id: '3',
+      filledColumns: 2,
+      filledRows: 2
     }
   ]
 }
 
 export default function Home() {
+  const [layout, setLayout] = useState(Layout.create(rawLayout))
+
   return (
-    <Layout.Root layout={layout}>
-      <Layout.Viewport className="h-full overflow-auto p-4">
-        <Layout.Area className="bg-square">
-          {layout.items.map(item => (
-            <Layout.Item id={item.id} key={item.id} className="bg-green-500" />
-          ))}
-        </Layout.Area>
-      </Layout.Viewport>
-    </Layout.Root>
+    <div className='w-screen h-screen overflow-auto'>
+      <LayoutFlow layout={layout} className='bg-square' onLayoutChange={setLayout}>
+        {layout.items.map(item => (
+          <div key={item.id} className='bg-red-500 flex items-center justify-center flex-col'>
+            {item.id}
+            <button onClick={() => setLayout(previousLayout => {
+              return previousLayout.resizeItem({ itemToResize: item, filledColumns: 5, filledRows: 5})
+            })}>Resize</button>
+          </div>
+        ))}
+      </LayoutFlow>
+    </div>
   )
 }

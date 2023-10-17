@@ -1,4 +1,4 @@
-import { NumberUtils, StringUtils } from '@/utils'
+import { NumberUtils } from '@/utils'
 
 export class Item {
   private constructor(
@@ -62,15 +62,20 @@ export class Item {
     maxFilledColumns = Infinity,
     maxFilledRows = Infinity,
   }: Item.CreateInput): Item {
-    if (!StringUtils.isDefined(id)) throw new Error('Invalid item id')
-    if (!NumberUtils.isGreaterThanZero(startColumn)) throw new Error('Invalid item start column')
-    if (!NumberUtils.isGreaterThanZero(startRow)) throw new Error('Invalid item start row')
-    if (!NumberUtils.isGreaterThanZero(filledColumns)) throw new Error('Invalid item filled columns')
-    if (!NumberUtils.isGreaterThanZero(filledRows)) throw new Error('Invalid item filled rows')
-    if (!NumberUtils.isGreaterThanZero(minFilledColumns)) throw new Error('Invalid item min filled columns')
-    if (!NumberUtils.isGreaterThanZero(minFilledRows)) throw new Error('Invalid item min filled rows')
-    if (!NumberUtils.isGreaterThanZero(maxFilledColumns)) throw new Error('Invalid item max filled columns')
-    if (!NumberUtils.isGreaterThanZero(maxFilledRows)) throw new Error('Invalid item max filled rows')
+    if (
+      !NumberUtils.isGreaterThanZeroMultiple(
+        startColumn,
+        startRow,
+        filledColumns,
+        filledRows,
+        minFilledColumns,
+        minFilledRows,
+        maxFilledColumns,
+        maxFilledRows,
+      )
+    ) {
+      throw new Error('Invalid create input')
+    }
     const endColumn = startColumn + filledColumns - 1
     const endRow = startRow + filledRows - 1
     return new Item(
@@ -91,19 +96,6 @@ export class Item {
 }
 
 export namespace Item {
-  export type CreateInput = {
-    id: string
-    isFixed?: boolean
-    startColumn: number
-    startRow: number
-    filledColumns: number
-    filledRows: number
-    minFilledColumns?: number
-    minFilledRows?: number
-    maxFilledColumns?: number
-    maxFilledRows?: number
-  }
-
   export type CalculateHeightInput = {
     sliceHeight: number
     gap: number
@@ -122,5 +114,18 @@ export namespace Item {
   export type CalculateYAxisInput = {
     sliceHeight: number
     gap: number
+  }
+
+  export type CreateInput = {
+    id: string
+    isFixed?: boolean
+    startColumn: number
+    startRow: number
+    filledColumns: number
+    filledRows: number
+    minFilledColumns?: number
+    minFilledRows?: number
+    maxFilledColumns?: number
+    maxFilledRows?: number
   }
 }
