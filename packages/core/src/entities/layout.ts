@@ -1,7 +1,7 @@
 import { Item } from './item'
 import { NumberUtils } from '@/utils'
 
-export class Layout {
+export class Layout<ItemMetadata = any | undefined> {
   private readonly lastFilledColumn: number
   private readonly lastFilledRow: number
 
@@ -13,7 +13,8 @@ export class Layout {
     readonly minTotalRows: number,
     readonly availableWidth: number,
     readonly isTotalColumnsFixed: boolean,
-    readonly items: Item[],
+    readonly allowsToGrowInWidth: boolean,
+    readonly items: Array<Item<ItemMetadata>>,
   ) {
     const lastFilled = this.items.reduce(
       (lastFilled, item) => {
@@ -49,6 +50,26 @@ export class Layout {
     return (this.sliceWidth + this.gap) * this.totalColumns
   }
 
+  changeAvailableWidth(newAvailableWidth: number): Layout {
+    if (!NumberUtils.isGreaterThanZero(newAvailableWidth)) {
+      throw new Error('Invalid change available width input')
+    }
+    const calculatedSliceWidth = this.allowsToGrowInWidth
+      ? this.sliceWidth
+      : (newAvailableWidth - this.totalColumns * this.gap) / this.totalColumns
+    return new Layout(
+      this.sliceHeight,
+      calculatedSliceWidth,
+      this.gap,
+      this.minTotalColumns,
+      this.minTotalRows,
+      newAvailableWidth,
+      this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
+      this.items,
+    )
+  }
+
   availableSlice({ filledColumns, filledRows }: Layout.AvailableSliceInput): Layout.AvailableSliceOutput {
     const visibleColumns = Math.floor(this.availableWidth / this.sliceWidth)
     let startRow = 1
@@ -80,6 +101,7 @@ export class Layout {
         this.minTotalRows,
         this.availableWidth,
         this.isTotalColumnsFixed,
+        this.allowsToGrowInWidth,
         [...this.items, Item.create({ ...item, startColumn, startRow })],
       )
     }
@@ -95,6 +117,7 @@ export class Layout {
       this.minTotalRows,
       this.availableWidth,
       this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
       [...this.items, Item.create({ startColumn: nextStartColumn, startRow: nextStartRow, ...item })],
     )
   }
@@ -109,6 +132,7 @@ export class Layout {
       this.minTotalRows,
       this.availableWidth,
       this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
       itemsWithoutItemToBeRemoved,
     )
   }
@@ -174,7 +198,9 @@ export class Layout {
     }, this)
   }
 
-  resizeItem({ itemToResize, filledColumns, filledRows }: Layout.ResizeItemInput): Layout {
+  resizeItem({ itemId, filledColumns, filledRows }: Layout.ResizeItemInput): Layout {
+    const itemToResize = this.items.find((item) => item.id === itemId)
+    if (itemToResize === undefined) return this
     const itemResized = Item.create({ ...itemToResize, filledColumns, filledRows })
     const collisions = this.items.filter((item) => item.hasCollision(itemResized))
     if (collisions.length > 0) return this
@@ -187,6 +213,7 @@ export class Layout {
       this.minTotalRows,
       this.availableWidth,
       this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
       [...itemsWithoutItemToResize, itemResized],
     )
   }
@@ -229,7 +256,38 @@ export class Layout {
       this.minTotalRows,
       this.availableWidth,
       this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
       [...itemsWithoutItemToMove, itemMoved],
+    )
+  }
+
+  fillEmptySlicesWithPlaceholder(metadata?: ItemMetadata): Layout {
+    const placeholderItems: Item[] = []
+    for (let row = 1; row <= this.lastFilledRow; row++) {
+      for (let column = 1; column <= this.lastFilledColumn; column++) {
+        const placeholderItem = Item.create({
+          id: `${Date.now()}${Math.random()}`,
+          startColumn: column,
+          startRow: row,
+          filledColumns: 1,
+          filledRows: 1,
+          metadata,
+        })
+        const isNonEmpty = this.items.some((item) => item.hasCollision(placeholderItem))
+        if (isNonEmpty) continue
+        placeholderItems.push(placeholderItem)
+      }
+    }
+    return new Layout(
+      this.sliceHeight,
+      this.sliceWidth,
+      this.gap,
+      this.minTotalColumns,
+      this.minTotalRows,
+      this.availableWidth,
+      this.isTotalColumnsFixed,
+      this.allowsToGrowInWidth,
+      [...this.items, ...placeholderItems],
     )
   }
 
@@ -269,6 +327,7 @@ export class Layout {
         totalRows,
         availableWidth,
         !isDefinedSliceWidth,
+        isDefinedSliceWidth,
         [],
       ),
     )
@@ -298,7 +357,7 @@ export namespace Layout {
   }
 
   export type ResizeItemInput = {
-    itemToResize: Item
+    itemId: string
     filledColumns: number
     filledRows: number
   }
@@ -316,7 +375,7 @@ export namespace Layout {
     lastScrollYAxis: number
   }
 
-  export type RawItem = {
+  export type RawItem<Metadata = any | undefined> = {
     id: string
     isFixed?: boolean
     startColumn?: number
@@ -327,6 +386,12 @@ export namespace Layout {
     minFilledRows?: number
     maxFilledColumns?: number
     maxFilledRows?: number
+    metadata?: Metadata
+  }
+
+  export type FillEmptySlicesWithPlaceholderInput = {
+    placeholderItemId: string
+    metadata: any
   }
 
   export type CreateInput = {

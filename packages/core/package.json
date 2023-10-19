@@ -1,6 +1,6 @@
 {
   "name": "@layout-flow/core",
-  "version": "4.0.1",
+  "version": "4.2.2",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

@@ -20,7 +20,7 @@ const rawLayout = {
     {
       id: '2',
       filledColumns: 2,
-      filledRows: 2
+      filledRows: 2,
     },
     {
       id: '3',
@@ -34,17 +34,17 @@ export default function Home() {
   const [layout, setLayout] = useState(Layout.create(rawLayout))
 
   return (
-    <div className='w-screen h-screen overflow-auto'>
+    <div className='w-screen h-screen overflow-auto flex gap-4'>
       <LayoutFlow layout={layout} className='bg-square' onLayoutChange={setLayout}>
         {layout.items.map(item => (
-          <div key={item.id} className='bg-red-500 flex items-center justify-center flex-col'>
+          <div key={item.id} className='bg-red-500 flex items-center justify-center flex-col overflow-hidden'>
             {item.id}
-            <button onClick={() => setLayout(previousLayout => {
-              return previousLayout.resizeItem({ itemToResize: item, filledColumns: 5, filledRows: 5})
-            })}>Resize</button>
           </div>
         ))}
       </LayoutFlow>
+      <button className='bg-green-500 p-4 rounded-lg h-12 flex items-center justify-center' onClick={() => {
+        setLayout(previousLayout => previousLayout.fillEmptySlicesWithPlaceholder({}))
+      }}>Placeholder</button>
     </div>
   )
 }

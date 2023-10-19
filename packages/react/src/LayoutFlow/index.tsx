@@ -25,7 +25,6 @@ type LayoutFlowProps = ComponentPropsWithoutRef<'div'> & {
   layout: Layout
   onLayoutChange?: (layout: Layout) => void
   canEdit?: boolean
-  children: ReactElement | ReactElement[]
 }
 
 export function LayoutFlow({
@@ -131,7 +130,7 @@ export function LayoutFlow({
   )
 
   const elements = useMemo(() => {
-    return Children.map(children, (child) => {
+    return Children.map(children as ReactElement[], (child) => {
       const item = layout.items.find((currentItem) => currentItem.id === child.key)
       if (item === undefined) return null
       return (
@@ -150,7 +149,14 @@ export function LayoutFlow({
   }, [canEdit, children, layout.gap, layout.items, layout.sliceHeight, layout.sliceWidth, onDragEnd, onDragStart])
 
   return (
-    <div {...props} data-is-dragging={isDragging} ref={ref} style={mergedStyle} onDragOver={onDrag}>
+    <div
+      {...props}
+      data-is-dragging={isDragging}
+      data-can-edit={canEdit}
+      ref={ref}
+      style={mergedStyle}
+      onDragOver={onDrag}
+    >
       {elements}
     </div>
   )

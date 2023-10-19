@@ -1,2 +1,2 @@
 export * from './LayoutFlow'
-export { Layout } from '@layout-flow/core'
+export { Layout, Item } from '@layout-flow/core'

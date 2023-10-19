@@ -1,6 +1,6 @@
 import { NumberUtils } from '@/utils'
 
-export class Item {
+export class Item<Metadata = any | undefined> {
   private constructor(
     readonly id: string,
     readonly isFixed: boolean,
@@ -14,6 +14,7 @@ export class Item {
     readonly minFilledRows: number,
     readonly maxFilledColumns: number,
     readonly maxFilledRows: number,
+    readonly metadata: Metadata,
   ) {
     Object.freeze(this)
   }
@@ -61,6 +62,7 @@ export class Item {
     minFilledRows = 1,
     maxFilledColumns = Infinity,
     maxFilledRows = Infinity,
+    metadata,
   }: Item.CreateInput): Item {
     if (
       !NumberUtils.isGreaterThanZeroMultiple(
@@ -91,6 +93,7 @@ export class Item {
       minFilledRows,
       maxFilledColumns,
       maxFilledRows,
+      metadata,
     )
   }
 }
@@ -116,7 +119,7 @@ export namespace Item {
     gap: number
   }
 
-  export type CreateInput = {
+  export type CreateInput<Metadata = any | undefined> = {
     id: string
     isFixed?: boolean
     startColumn: number
@@ -127,5 +130,6 @@ export namespace Item {
     minFilledRows?: number
     maxFilledColumns?: number
     maxFilledRows?: number
+    metadata?: Metadata
   }
 }
