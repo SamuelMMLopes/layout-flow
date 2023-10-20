@@ -1,5 +1,21 @@
 # @layout-flow/react
 
+## 4.2.5
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @layout-flow/core@4.2.4
+
+## 4.2.4
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @layout-flow/core@4.2.3
+
 ## 4.2.3
 
 ### Patch Changes

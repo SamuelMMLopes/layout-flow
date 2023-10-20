@@ -240,10 +240,25 @@ export class Layout<ItemMetadata = any | undefined> {
     return Math.round(yAxisToMove / (this.sliceHeight + this.gap))
   }
 
+  private isAwayTheLayout({ startColumn, startRow, filledColumns }: Layout.IsAwayTheGridInput): boolean {
+    if (startColumn < 1 || startRow < 1) return true
+    if (!this.isTotalColumnsFixed) return false
+    const endColumn = startColumn + filledColumns - 1
+    return endColumn > this.minTotalColumns
+  }
+
   moveItem({ itemToMove, columnsToMove, rowsToMove }: Layout.MoveItemInput): Layout {
     const newStartColumn = itemToMove.startColumn + columnsToMove
     const newStartRow = itemToMove.startRow + rowsToMove
-    if (newStartColumn < 1 || newStartRow < 1) return this
+    if (
+      this.isAwayTheLayout({
+        startColumn: newStartColumn,
+        startRow: newStartRow,
+        filledColumns: itemToMove.filledColumns,
+      })
+    ) {
+      return this
+    }
     const itemMoved = Item.create({ ...itemToMove, startColumn: newStartColumn, startRow: newStartRow })
     const collisions = this.items.filter((item) => item.hasCollision(itemMoved))
     if (collisions.length > 0) return this
@@ -360,6 +375,12 @@ export namespace Layout {
     itemId: string
     filledColumns: number
     filledRows: number
+  }
+
+  export type IsAwayTheGridInput = {
+    startColumn: number
+    startRow: number
+    filledColumns: number
   }
 
   export type MoveItemInput = {
